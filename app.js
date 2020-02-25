@@ -8,7 +8,8 @@ window.addEventListener('load', () => {
   let temperatureDescription = document.querySelector('.temperature-description');
   let locationTimezone = document.querySelector('.location-timezone');
   let temperatureDegree = document.querySelector('.temperature-degree');
-
+  let temperatureSection = document.querySelector('.temperature')
+  const temperatureSpan = document.querySelector('.temperature span')
   //allow user to share location, if shared
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(position => {
@@ -27,15 +28,41 @@ window.addEventListener('load', () => {
         })
         .then(data => {
           console.log(data);
-          const {temperature, summary } = data.currently;
+          const {temperature, summary, icon } = data.currently;
           //Set dom elements from the api
           temperatureDegree.textContent = temperature;
           temperatureDescription.textContent = summary;
           locationTimezone.textContent = data.timezone;
+
+          // set icon
+          setIcons(icon, document.querySelector('.icon'));
+
+          //Change F to C
+          temperatureSection.addEventListener('click', () =>{
+            //on click
+            if(temperatureSpan.textContent === "F"){
+              temperatureSpan.textContent = 'C';
+              f_to_c = (temperature - 32)*(5/9)
+              temperatureDegree.textContent = Math.round((f_to_c + Number.EPSILON) * 100) / 100
+
+            } else {
+              temperatureSpan.textContent = 'F';
+              temperatureDegree.textContent = temperature;
+            }
+          });
         });
         // if fetch works properly
     });
   } else {
     window.alert("Browser not supported or something wrong with location share");
   }
+
+  //function for icon depending on Weather
+  function setIcons(icon, iconID){
+    const skycons = new Skycons({color: "white"});
+    const currentIcon = icon.replace(/-/g, "_").toUpperCase();
+    skycons.play();
+    return skycons.set(iconID, Skycons[currentIcon]);
+  }
+
 });
